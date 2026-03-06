@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AB测试论文阅读系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .controls {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .controls-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .control-group label {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .control-group input,
+        .control-group select {
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .control-group input:focus,
+        .control-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .stats {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .stats-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-item .label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .stat-item .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .papers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+            gap: 20px;
+        }
+        
+        .paper-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .paper-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+        
+        .paper-header {
+            margin-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+        
+        .paper-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .paper-meta {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .paper-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .category-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .paper-section {
+            margin-bottom: 15px;
+        }
+        
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+        
+        .section-content {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .paper-links {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .paper-link {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            background: #f5f5f5;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #667eea;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        
+        .paper-link:hover {
+            background: #e0e0e0;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 18px;
+        }
+        
+        .error {
+            background: #ff5252;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .empty {
+            background: white;
+            border-radius: 12px;
+            padding: 60px 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+        
+        .empty-text {
+            font-size: 18px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 AB测试论文阅读系统</h1>
+            <p>每日自动获取和解读arXiv上最新的AB测试相关论文</p>
+        </header>
+        
+        <div class="controls">
+            <div class="controls-row">
+                <div class="control-group">
+                    <label for="dateFilter">日期：</label>
+                    <input type="date" id="dateFilter">
+                </div>
+                <div class="control-group">
+                    <label for="categoryFilter">分类：</label>
+                    <select id="categoryFilter">
+                        <option value="">全部分类</option>
+                    </select>
+                </div>
+                <button onclick="filterPapers()">查询</button>
+                <button onclick="resetFilters()">重置</button>
+                <button onclick="fetchNewPapers()" style="margin-left: auto;">手动获取最新论文</button>
+            </div>
+        </div>
+        
+        <div class="stats" id="stats">
+            <div class="stats-row">
+                <div class="stat-item">
+                    <div class="label">论文总数</div>
+                    <div class="value" id="totalPapers">-</div>
+                </div>
+                <div class="stat-item">
+                    <div class="label">当前显示</div>
+                    <div class="value" id="currentCount">-</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="errorMessage"></div>
+        <div id="loading" class="loading" style="display:none;">加载中...</div>
+        <div id="papersContainer" class="papers-grid"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api';
+        let allPapers = [];
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCategories();
+            loadPapers();
+            loadStats();
+        });
+        
+        // 加载分类列表
+        async function loadCategories() {
+            try {
+                const response = await fetch(`${API_BASE}/categories`);
+                const data = await response.json();
+                const select = document.getElementById('categoryFilter');
+                data.categories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat;
+                    option.textContent = cat;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('加载分类失败:', error);
+            }
+        }
+        
+        // 加载论文列表
+        async function loadPapers(date = '', category = '') {
+            const loading = document.getElementById('loading');
+            const container = document.getElementById('papersContainer');
+            const errorDiv = document.getElementById('errorMessage');
+            
+            loading.style.display = 'block';
+            container.innerHTML = '';
+            errorDiv.innerHTML = '';
+            
+            try {
+                let url = `${API_BASE}/papers?limit=100`;
+                if (date) url += `&date=${date}`;
+                if (category) url += `&category=${encodeURIComponent(category)}`;
+                
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('获取论文失败');
+                
+                const data = await response.json();
+                allPapers = data.papers;
+                
+                document.getElementById('currentCount').textContent = allPapers.length;
+                
+                if (allPapers.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty">
+                            <div class="empty-icon">📄</div>
+                            <div class="empty-text">暂无论文数据，请点击"手动获取最新论文"按钮</div>
+                        </div>
+                    `;
+                } else {
+                    renderPapers(allPapers);
+                }
+            } catch (error) {
+                errorDiv.innerHTML = `<div class="error">加载失败: ${error.message}</div>`;
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        // 渲染论文列表
+        function renderPapers(papers) {
+            const container = document.getElementById('papersContainer');
+            container.innerHTML = papers.map(paper => `
+                <div class="paper-card">
+                    <div class="paper-header">
+                        <div class="paper-title">${escapeHtml(paper.title)}</div>
+                        <div class="paper-meta">
+                            <span>📅 ${formatDate(paper.published_date)}</span>
+                            <span>✍️ ${escapeHtml(paper.authors.split(',')[0])} 等</span>
+                            ${paper.category ? `<span class="category-badge">${escapeHtml(paper.category)}</span>` : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="paper-section">
+                        <div class="section-title">中文摘要</div>
+                        <div class="section-content">${escapeHtml(paper.summary_cn || paper.abstract)}</div>
+                    </div>
+                    
+                    <div class="paper-section">
+                        <div class="section-title">论文解读</div>
+                        <div class="section-content">${escapeHtml(paper.interpretation || '暂无解读').split('\n').join('<br>')}</div>
+                    </div>
+                    
+                    <div class="paper-links">
+                        <a href="${paper.arxiv_url}" target="_blank" class="paper-link">arXiv页面</a>
+                        <a href="${paper.pdf_url}" target="_blank" class="paper-link">PDF下载</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // 加载统计数据
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_BASE}/stats`);
+                const data = await response.json();
+                document.getElementById('totalPapers').textContent = data.total_papers;
+            } catch (error) {
+                console.error('加载统计失败:', error);
+            }
+        }
+        
+        // 筛选论文
+        function filterPapers() {
+            const date = document.getElementById('dateFilter').value;
+            const category = document.getElementById('categoryFilter').value;
+            loadPapers(date, category);
+        }
+        
+        // 重置筛选
+        function resetFilters() {
+            document.getElementById('dateFilter').value = '';
+            document.getElementById('categoryFilter').value = '';
+            loadPapers();
+        }
+        
+        // 手动获取最新论文
+        async function fetchNewPapers() {
+            if (!confirm('确定要获取最新论文吗？这可能需要几分钟时间。')) return;
+            
+            const loading = document.getElementById('loading');
+            const errorDiv = document.getElementById('errorMessage');
+            
+            loading.style.display = 'block';
+            errorDiv.innerHTML = '';
+            
+            try {
+                const response = await fetch(`${API_BASE}/fetch`, {
+                    method: 'POST'
+                });
+                
+                if (!response.ok) throw new Error('获取论文失败');
+                
+                const data = await response.json();
+                alert(data.message);
+                
+                // 重新加载数据
+                await loadPapers();
+                await loadStats();
+            } catch (error) {
+                errorDiv.innerHTML = `<div class="error">获取失败: ${error.message}</div>`;
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        // 工具函数
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('zh-CN');
+        }
+    </script>
+</body>
+</html>

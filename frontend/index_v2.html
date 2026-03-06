@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AB测试论文阅读系统 v2.0</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        header .version {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+        
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .controls {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .controls-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .control-group label {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .control-group input,
+        .control-group select {
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .control-group input:focus,
+        .control-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button.secondary {
+            background: #6c757d;
+        }
+        
+        .stats {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .stats-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-item .label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .stat-item .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        /* 单列布局 */
+        .papers-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .paper-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .paper-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+        
+        .paper-card.marked {
+            border-left: 5px solid #ffc107;
+        }
+        
+        .paper-header {
+            margin-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .paper-header-left {
+            flex: 1;
+        }
+        
+        .paper-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .paper-title-cn {
+            font-size: 18px;
+            color: #667eea;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+        
+        .paper-meta {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .paper-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .category-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .value-score {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #4caf50;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .value-score.low {
+            background: #9e9e9e;
+        }
+        
+        .value-score.medium {
+            background: #ff9800;
+        }
+        
+        .value-score.high {
+            background: #4caf50;
+        }
+        
+        .mark-button {
+            background: transparent;
+            border: 2px solid #ffc107;
+            color: #ffc107;
+            padding: 8px 16px;
+            font-size: 13px;
+            min-width: 100px;
+        }
+        
+        .mark-button.marked {
+            background: #ffc107;
+            color: white;
+        }
+        
+        /* 标签页 */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            border-bottom: 2px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: #666;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .tab:hover {
+            color: #667eea;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #667eea;
+            margin: 20px 0 10px;
+            padding-left: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .section-content {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.8;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+        
+        .structured-item {
+            margin-bottom: 20px;
+        }
+        
+        .structured-item h4 {
+            color: #667eea;
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+        
+        .structured-item p {
+            color: #555;
+            line-height: 1.7;
+            padding-left: 15px;
+        }
+        
+        /* 思维导图样式 */
+        .mindmap {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .mindmap-node {
+            margin: 10px 0;
+        }
+        
+        .mindmap-node.level-0 {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .mindmap-node.level-1 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-left: 40px;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+            margin-top: 15px;
+        }
+        
+        .mindmap-node.level-2 {
+            font-size: 14px;
+            color: #666;
+            margin-left: 80px;
+            padding: 8px;
+            margin-top: 8px;
+            position: relative;
+        }
+        
+        .mindmap-node.level-2::before {
+            content: "•";
+            position: absolute;
+            left: -15px;
+            color: #667eea;
+        }
+        
+        /* 平台价值 */
+        .platform-value {
+            padding: 20px;
+        }
+        
+        .value-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .value-judgment {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .value-judgment.yes {
+            color: #4caf50;
+        }
+        
+        .value-judgment.no {
+            color: #f44336;
+        }
+        
+        .value-points {
+            margin-top: 15px;
+        }
+        
+        .value-point {
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            border-radius: 4px;
+            line-height: 1.6;
+        }
+        
+        .value-reasoning {
+            margin-top: 15px;
+            padding: 15px;
+            background: #fff3e0;
+            border-radius: 8px;
+            line-height: 1.7;
+        }
+        
+        .paper-links {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .paper-link {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #667eea;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        
+        .paper-link:hover {
+            background: #e0e0e0;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 18px;
+        }
+        
+        .error {
+            background: #ff5252;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .empty {
+            background: white;
+            border-radius: 12px;
+            padding: 60px 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+        
+        .empty-text {
+            font-size: 18px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 AB测试论文阅读系统 <span class="version">v2.0</span></h1>
+            <p>每日自动获取和解读arXiv上最新的AB测试相关论文</p>
+        </header>
+        
+        <div class="controls">
+            <div class="controls-row">
+                <div class="control-group">
+                    <label for="dateFrom">开始日期：</label>
+                    <input type="date" id="dateFrom">
+                </div>
+                <div class="control-group">
+                    <label for="dateTo">结束日期：</label>
+                    <input type="date" id="dateTo">
+                </div>
+                <div class="control-group">
+                    <label for="categoryFilter">分类：</label>
+                    <select id="categoryFilter">
+                        <option value="">全部分类</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="sortBy">排序：</label>
+                    <select id="sortBy">
+                        <option value="date">按日期</option>
+                        <option value="value">按价值分</option>
+                    </select>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="markedOnly">
+                    <label for="markedOnly">只看已标记</label>
+                </div>
+                <button onclick="filterPapers()">查询</button>
+                <button onclick="resetFilters()" class="secondary">重置</button>
+                <div class="control-group" style="margin-left: auto;">
+                    <label for="fetchDays">获取范围：</label>
+                    <select id="fetchDays">
+                        <option value="1">最近1天</option>
+                        <option value="3">最近3天</option>
+                        <option value="7" selected>最近7天</option>
+                        <option value="14">最近14天</option>
+                        <option value="30">最近30天</option>
+                    </select>
+                    <button onclick="fetchNewPapers()">手动获取论文</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats" id="stats">
+            <div class="stats-row">
+                <div class="stat-item">
+                    <div class="label">论文总数</div>
+                    <div class="value" id="totalPapers">-</div>
+                </div>
+                <div class="stat-item">
+                    <div class="label">当前显示</div>
+                    <div class="value" id="currentCount">-</div>
+                </div>
+                <div class="stat-item">
+                    <div class="label">已标记</div>
+                    <div class="value" id="markedCount">-</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="errorMessage"></div>
+        <div id="loading" class="loading" style="display:none;">加载中...</div>
+        <div id="papersContainer" class="papers-container"></div>
+    </div>
+
+    <script src="frontend_v2.js"></script>
+</body>
+</html>

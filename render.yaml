@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: ab-paper-reader
+    env: python
+    region: singapore
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.18
+      - key: AI_PROVIDER
+        value: qwen
+      - key: AI_API_KEY
+        sync: false
+      - key: AI_BASE_URL
+        value: https://dashscope.aliyuncs.com/compatible-mode/v1
+      - key: AI_MODEL
+        value: qwen-plus
