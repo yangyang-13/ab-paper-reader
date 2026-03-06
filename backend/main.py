@@ -109,7 +109,7 @@ def get_papers(
     marked_only: Optional[bool] = Query(False, description="只显示已标记的论文"),
     sort_by: Optional[str] = Query("date", description="排序方式：date(日期) 或 value(价值分)"),
     skip: int = Query(0, ge=0, description="跳过数量"),
-    limit: int = Query(50, ge=1, le=100, description="返回数量"),
+    limit: int = Query(50, ge=1, le=1000, description="返回数量"),
     db: Session = Depends(get_db)
 ):
     """
