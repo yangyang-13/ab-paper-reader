@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:8000/api';
+const API_BASE ='https://ab-paper-reader.onrender.com/api';
 let allPapers = [];
 
 // 初始化
