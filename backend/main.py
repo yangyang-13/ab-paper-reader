@@ -338,6 +338,7 @@ def get_statistics(db: Session = Depends(get_db)):
     from sqlalchemy import func
     
     total_papers = db.query(func.count(Paper.id)).scalar()
+    marked_papers = db.query(func.count(Paper.id)).filter(Paper.is_marked == True).scalar()
     
     category_stats = db.query(
         Paper.category,
@@ -346,10 +347,57 @@ def get_statistics(db: Session = Depends(get_db)):
     
     return {
         "total_papers": total_papers,
+        "marked_papers": marked_papers,
         "category_distribution": {
             cat: count for cat, count in category_stats if cat
         }
     }
+
+@app.delete("/api/papers/clear")
+def clear_all_papers(
+    confirm: bool = Query(False, description="确认删除"),
+    db: Session = Depends(get_db)
+):
+    """
+    清空数据库中的所有论文
+    
+    参数：
+    - confirm: 必须设置为 true 才能执行删除操作
+    """
+    if not confirm:
+        raise HTTPException(
+            status_code=400,
+            detail="必须设置 confirm=true 参数才能执行删除操作"
+        )
+    
+    try:
+        # 查询当前论文数量
+        count = db.query(func.count(Paper.id)).scalar()
+        
+        if count == 0:
+            return {
+                "message": "数据库已经是空的",
+                "deleted_count": 0
+            }
+        
+        # 删除所有论文
+        deleted = db.query(Paper).delete()
+        db.commit()
+        
+        logger.info(f"✓ Cleared {deleted} papers from database")
+        
+        return {
+            "message": f"成功删除 {deleted} 篇论文",
+            "deleted_count": deleted
+        }
+        
+    except Exception as e:
+        logger.error(f"Error clearing database: {e}")
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"清空数据库失败：{str(e)}"
+        )
 
 if __name__ == "__main__":
     import uvicorn
