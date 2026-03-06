@@ -1,9 +1,11 @@
 from fastapi import FastAPI, Depends, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from typing import List, Optional
 import logging
+import os
 from dotenv import load_dotenv
 
 # 加载环境变量
@@ -27,6 +29,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 挂载前端静态文件
+frontend_path = os.path.join(os.path.dirname(__file__), "..", "frontend")
+if os.path.exists(frontend_path):
+    app.mount("/frontend", StaticFiles(directory=frontend_path), name="frontend")
+    logger.info(f"✅ 前端静态文件已挂载: {frontend_path}")
+else:
+    logger.warning(f"⚠️ 前端目录不存在: {frontend_path}")
 
 # 初始化数据库
 init_db()
